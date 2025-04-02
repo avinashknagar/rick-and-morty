@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import CharacterList from './components/CharacterList';
+import CharacterModal from './components/CharacterModal';
 import Pagination from './components/Pagination';
 import SearchBar from './components/SearchBar';
-import { fetchCharacters } from './api';
+import { fetchCharacters, fetchCharacterById } from './api';
 import './App.css';
 
 function App() {
@@ -13,6 +14,8 @@ function App() {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [lastSearchQuery, setLastSearchQuery] = useState('');
+  const [selectedCharacter, setSelectedCharacter] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const getCharacters = async () => {
@@ -58,17 +61,33 @@ function App() {
 
   const handleSearch = (query) => {
     setSearchQuery(query);
-    // We'll let the useEffect handle resetting currentPage only when search query changes
+  };
+
+  const handleCharacterClick = async (id) => {
+    try {
+      setIsLoading(true);
+      const character = await fetchCharacterById(id);
+      setSelectedCharacter(character);
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error('Error loading character details:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
   };
 
   return (
-    <div className="app-container">
-      <header className="header">
-        <div className="header-title">
-          <h1>Rick and Morty Character Explorer</h1>
-          <p>Explore characters from the Rick and Morty universe</p>
+    <div className="app-container" id="rick-morty-app">
+      <header className="header" id="app-header">
+        <div className="header-title" id="header-title-container">
+          <h1 id="main-title">Rick and Morty Character Explorer</h1>
+          <p id="main-subtitle">Explore characters from the Rick and Morty universe</p>
         </div>
-        <div className="header-search">
+        <div className="header-search" id="search-pagination-container">
           <SearchBar onSearch={handleSearch} />
           {info.pages > 0 && (
             <Pagination 
@@ -83,17 +102,27 @@ function App() {
         </div>
       </header>
 
-      <div className="main-content">
-        <div className="content-area">
-          {isLoading ? (
-            <div className="loading">Loading characters...</div>
+      <div className="main-content" id="main-content">
+        <div className="content-area" id="characters-display-area">
+          {isLoading && !isModalOpen ? (
+            <div className="loading" id="loading-indicator">Loading characters...</div>
           ) : error ? (
-            <div className="error">{error}</div>
+            <div className="error" id="error-message">{error}</div>
           ) : (
-            <CharacterList characters={characters} />
+            <CharacterList 
+              characters={characters} 
+              onCharacterClick={handleCharacterClick} 
+            />
           )}
         </div>
       </div>
+
+      {isModalOpen && selectedCharacter && (
+        <CharacterModal 
+          character={selectedCharacter} 
+          onClose={handleCloseModal}
+        />
+      )}
     </div>
   );
 }

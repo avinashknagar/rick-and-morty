@@ -15,3 +15,13 @@ export const fetchCharacters = async (page = 1, name = '') => {
     throw error;
   }
 };
+
+export const fetchCharacterById = async (id) => {
+  try {
+    const response = await axios.get(`${BASE_URL}/character/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching character:', error);
+    throw error;
+  }
+};

@@ -1,6 +1,6 @@
 import React from 'react';
 
-const CharacterCard = ({ character }) => {
+const CharacterCard = ({ character, onClick }) => {
   const getStatusClass = (status) => {
     switch (status.toLowerCase()) {
       case 'alive':
@@ -13,7 +13,7 @@ const CharacterCard = ({ character }) => {
   };
 
   return (
-    <div className="character-card">
+    <div className="character-card" onClick={() => onClick(character.id)}>
       <img 
         src={character.image} 
         alt={character.name} 
